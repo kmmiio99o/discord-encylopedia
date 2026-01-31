@@ -137,27 +137,44 @@ const ClientCard: React.FC<ClientCardProps> = ({
       </CardContent>
 
       <Stack direction="row" spacing={1} sx={{ p: 2, pt: 0 }}>
-        <Button
-          variant="contained"
-          fullWidth
-          href={finalUrl || undefined}
-          target="_blank"
-          disabled={!finalUrl}
-          startIcon={finalUrl ? <LinkIcon /> : null}
-          sx={{
-            borderRadius: 3,
-            textTransform: "none",
-            fontWeight: 700,
-            py: 1,
-            boxShadow: "none",
-            "&.Mui-disabled": {
-              backgroundColor: alpha(theme.palette.text.primary, 0.1),
-              color: alpha(theme.palette.text.primary, 0.3),
-            },
-          }}
-        >
-          {finalUrl ? "Get Client" : "No Link Available"}
-        </Button>
+        {finalUrl ? (
+          <Button
+            variant="contained"
+            fullWidth
+            href={finalUrl}
+            target="_blank"
+            startIcon={<LinkIcon />}
+            sx={{
+              borderRadius: 3,
+              textTransform: "none",
+              fontWeight: 700,
+              py: 1.5,
+              boxShadow: "none",
+            }}
+          >
+            Open Link
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            fullWidth
+            disabled
+            startIcon={null}
+            sx={{
+              borderRadius: 3,
+              textTransform: "none",
+              fontWeight: 700,
+              py: 1.5,
+              boxShadow: "none",
+              "&.Mui-disabled": {
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                color: alpha(theme.palette.primary.main, 0.5),
+              },
+            }}
+          >
+            No Link Available
+          </Button>
+        )}
 
         {showPlugins && onViewPlugins && (
           <Tooltip title="View Plugins">

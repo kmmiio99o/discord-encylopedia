@@ -143,7 +143,7 @@ const Clients: React.FC = () => {
                     onClick={(e) =>
                       subs.length > 1
                         ? handleOpenMenu(e, cat)
-                        : selectCategory(cat, subs[0])
+                        : selectCategory(cat, subs[0] || '')
                     }
                     sx={{
                       px: { xs: 2, md: 2.5 },
@@ -217,15 +217,17 @@ const Clients: React.FC = () => {
           }}
         >
           {activeMenuCat &&
-            getSubcategories(activeMenuCat).map((sub) => (
-              <MenuItem
-                key={sub}
-                onClick={() => selectCategory(activeMenuCat, sub)}
-                selected={activeCat === activeMenuCat && effectiveSub === sub}
-              >
-                {sub}
-              </MenuItem>
-            ))}
+            getSubcategories(activeMenuCat)
+              .filter((sub): sub is string => sub !== undefined)
+              .map((sub) => (
+                <MenuItem
+                  key={sub}
+                  onClick={() => selectCategory(activeMenuCat, sub)}
+                  selected={activeCat === activeMenuCat && effectiveSub === sub}
+                >
+                  {sub}
+                </MenuItem>
+              ))}
         </Menu>
       </Container>
     </Box>
