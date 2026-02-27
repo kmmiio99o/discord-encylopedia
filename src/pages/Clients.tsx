@@ -5,23 +5,129 @@ import {
   Box,
   Typography,
   useTheme,
-  Stack,
-  ButtonBase,
-  Menu,
-  MenuItem,
-  Fade,
+  alpha,
 } from "@mui/material";
 import { useRemoteMarkdown } from "../hooks/useRemoteData";
 import { UrlConfigContext } from "../context/UrlConfigContext";
 import { parseCategorizedMarkdown } from "../utils/markdownParser";
 import ClientCard from "../components/client-mod/ClientCard";
-import { KeyboardArrowDown } from "@mui/icons-material";
+import { KeyboardArrowDown, FilterList } from "@mui/icons-material";
+
+const Dropdown = ({
+  label,
+  value,
+  options,
+  onChange,
+  isOpen,
+  onToggle,
+  onClose,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (val: string) => void;
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}) => {
+  const theme = useTheme();
+
+  return (
+    <Box sx={{ position: "relative", flex: 1 }}>
+      <Box
+        onClick={() => onToggle()}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 2,
+          py: 1.5,
+          borderRadius: 2,
+          bgcolor: "background.paper",
+          border: `1px solid ${isOpen ? theme.palette.primary.main : theme.palette.divider}`,
+          cursor: "pointer",
+          transition: "all 0.2s ease",
+          "&:hover": {
+            borderColor: theme.palette.primary.main,
+            bgcolor: alpha(theme.palette.primary.main, 0.04),
+          },
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <FilterList sx={{ fontSize: 18, color: "text.secondary" }} />
+          <Typography fontWeight={600} fontSize="0.9rem">
+            {label}:
+          </Typography>
+          <Typography fontWeight={500} color="primary.main">
+            {value}
+          </Typography>
+        </Box>
+        <KeyboardArrowDown
+          sx={{
+            fontSize: 20,
+            color: "text.secondary",
+            transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+          }}
+        />
+      </Box>
+
+      <Box
+        sx={{
+          position: "absolute",
+          top: "100%",
+          left: 0,
+          right: 0,
+          mt: 1,
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.15)}`,
+          overflow: "hidden",
+          zIndex: 1000,
+          opacity: isOpen ? 1 : 0,
+          visibility: isOpen ? "visible" : "hidden",
+          transform: isOpen ? "translateY(0)" : "translateY(-8px)",
+          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        {options.map((option) => (
+          <Box
+            key={option}
+            onClick={() => {
+              onChange(option);
+              onClose();
+            }}
+            sx={{
+              px: 2,
+              py: 1.5,
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+              bgcolor: value === option ? alpha(theme.palette.primary.main, 0.1) : "transparent",
+              "&:hover": {
+                bgcolor: value === option 
+                  ? alpha(theme.palette.primary.main, 0.15) 
+                  : alpha(theme.palette.primary.main, 0.05),
+              },
+            }}
+          >
+            <Typography
+              fontWeight={value === option ? 700 : 500}
+              color={value === option ? "primary.main" : "text.primary"}
+              fontSize="0.9rem"
+            >
+              {option}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+};
 
 const Clients: React.FC = () => {
-  const theme = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [activeMenuCat, setActiveMenuCat] = useState<string | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const activeCat = searchParams.get("category") || "Mobile";
   const activeSub = searchParams.get("sub");
@@ -46,7 +152,7 @@ const Clients: React.FC = () => {
           .filter((c) => c.title.toLowerCase() === category.toLowerCase())
           .map((c) => c.subcategory),
       ),
-    );
+    ).filter((s): s is string => s !== undefined);
   };
 
   const currentSubcategories = getSubcategories(activeCat);
@@ -58,22 +164,17 @@ const Clients: React.FC = () => {
       c.subcategory === effectiveSub,
   );
 
-  const handleOpenMenu = (
-    event: React.MouseEvent<HTMLElement>,
-    cat: string,
-  ) => {
-    setAnchorEl(event.currentTarget);
-    setActiveMenuCat(cat);
+  const handleCategoryChange = (cat: string) => {
+    const subs = getSubcategories(cat);
+    setSearchParams({ category: cat, sub: subs[0] || "" });
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-    setActiveMenuCat(null);
+  const handleSubChange = (sub: string) => {
+    setSearchParams({ category: activeCat, sub });
   };
 
-  const selectCategory = (cat: string, sub: string) => {
-    setSearchParams({ category: cat, sub });
-    handleClose();
+  const toggleDropdown = (name: string) => {
+    setOpenDropdown(openDropdown === name ? null : name);
   };
 
   if (isLoading) return null;
@@ -83,152 +184,97 @@ const Clients: React.FC = () => {
       sx={{
         minHeight: "100vh",
         bgcolor: "background.default",
-        pt: { xs: 4, md: 8 },
+        pt: { xs: 2, md: 8 },
         pb: 8,
       }}
     >
       <Container maxWidth="lg">
-        {/* Header Section */}
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          justifyContent="space-between"
-          alignItems={{ xs: "flex-start", md: "center" }}
-          spacing={3}
-          sx={{ mb: { xs: 4, md: 6 } }}
-        >
-          <Box>
-            <Typography
-              variant="h4"
-              sx={{ fontWeight: 800, letterSpacing: -1 }}
-            >
-              Registry
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Viewing {activeCat}{" "}
-              <Box component="span" sx={{ opacity: 0.5 }}>
-                /
-              </Box>{" "}
-              {effectiveSub}
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              width: { xs: "100%", md: "auto" },
-              overflowX: "auto",
-              whiteSpace: "nowrap",
-              "&::-webkit-scrollbar": { display: "none" },
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
-              pb: { xs: 1, md: 0 },
-            }}
+        <Box sx={{ mb: { xs: 3, md: 4 } }}>
+          <Typography
+            variant="h4"
+            sx={{ fontWeight: 800, letterSpacing: -1, mb: 0.5 }}
           >
-            <Stack
-              direction="row"
-              display="inline-flex"
-              sx={{
-                p: 0.5,
-                bgcolor: "background.paper",
-                borderRadius: 3,
-                border: `1px solid ${theme.palette.divider}`,
-              }}
-            >
-              {mainCategories.map((cat) => {
-                const isActive = activeCat === cat;
-                const subs = getSubcategories(cat);
+            Registry
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {currentView?.clients.length || 0} clients in {effectiveSub}
+          </Typography>
+        </Box>
 
-                return (
-                  <ButtonBase
-                    key={cat}
-                    onClick={(e) =>
-                      subs.length > 1
-                        ? handleOpenMenu(e, cat)
-                        : selectCategory(cat, subs[0] || '')
-                    }
-                    sx={{
-                      px: { xs: 2, md: 2.5 },
-                      py: 1,
-                      borderRadius: 2.5,
-                      fontSize: "0.875rem",
-                      fontWeight: 600,
-                      flexShrink: 0,
-                      color: isActive ? "primary.main" : "text.secondary",
-                      bgcolor: isActive
-                        ? theme.palette.primary.main + "10"
-                        : "transparent",
-                      "&:hover": { bgcolor: theme.palette.action.hover },
-                    }}
-                  >
-                    {cat}
-                    {subs.length > 1 && (
-                      <KeyboardArrowDown
-                        sx={{ fontSize: 16, ml: 0.5, opacity: 0.5 }}
-                      />
-                    )}
-                  </ButtonBase>
-                );
-              })}
-            </Stack>
-          </Box>
-        </Stack>
+        {/* Mobile: Two Dropdowns */}
+        <Box
+          sx={{
+            display: { xs: "flex", lg: "none" },
+            flexDirection: "column",
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <Dropdown
+            label="Category"
+            value={activeCat}
+            options={mainCategories}
+            onChange={handleCategoryChange}
+            isOpen={openDropdown === "category"}
+            onToggle={() => toggleDropdown("category")}
+            onClose={() => setOpenDropdown(null)}
+          />
+          <Dropdown
+            label="Type"
+            value={effectiveSub}
+            options={currentSubcategories}
+            onChange={handleSubChange}
+            isOpen={openDropdown === "type"}
+            onToggle={() => toggleDropdown("type")}
+            onClose={() => setOpenDropdown(null)}
+          />
+        </Box>
+
+        {/* Desktop: Compact Dropdowns */}
+        <Box
+          sx={{
+            display: { xs: "none", lg: "flex" },
+            alignItems: "center",
+            gap: 2,
+            mb: 4,
+          }}
+        >
+          <Dropdown
+            label="Category"
+            value={activeCat}
+            options={mainCategories}
+            onChange={handleCategoryChange}
+            isOpen={openDropdown === "category"}
+            onToggle={() => toggleDropdown("category")}
+            onClose={() => setOpenDropdown(null)}
+          />
+          <Dropdown
+            label="Type"
+            value={effectiveSub}
+            options={currentSubcategories}
+            onChange={handleSubChange}
+            isOpen={openDropdown === "type"}
+            onToggle={() => toggleDropdown("type")}
+            onClose={() => setOpenDropdown(null)}
+          />
+        </Box>
 
         {/* Client Grid */}
-        <Fade in={true} timeout={400}>
-          <Box
-            sx={{
-              display: "grid",
-              gap: { xs: 2, md: 3 },
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(3, 1fr)",
-              },
-            }}
-          >
-            {currentView?.clients.map((client, idx) => (
-              <ClientCard key={`${client.name}-${idx}`} client={client} />
-            ))}
-          </Box>
-        </Fade>
-
-        {/* Adaptive Menu for Subcategories */}
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          elevation={4}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          transformOrigin={{ vertical: "top", horizontal: "center" }}
-          PaperProps={{
-            sx: {
-              mt: 1,
-              minWidth: 200,
-              borderRadius: 3,
-              border: `1px solid ${theme.palette.divider}`,
-              "& .MuiMenuItem-root": {
-                fontSize: "0.9rem",
-                fontWeight: 500,
-                borderRadius: 1.5,
-                mx: 1,
-                my: 0.5,
-                py: 1,
-              },
+        <Box
+          sx={{
+            display: "grid",
+            gap: { xs: 2, md: 3 },
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
             },
           }}
         >
-          {activeMenuCat &&
-            getSubcategories(activeMenuCat)
-              .filter((sub): sub is string => sub !== undefined)
-              .map((sub) => (
-                <MenuItem
-                  key={sub}
-                  onClick={() => selectCategory(activeMenuCat, sub)}
-                  selected={activeCat === activeMenuCat && effectiveSub === sub}
-                >
-                  {sub}
-                </MenuItem>
-              ))}
-        </Menu>
+          {currentView?.clients.map((client, idx) => (
+            <ClientCard key={`${client.name}-${idx}`} client={client} />
+          ))}
+        </Box>
       </Container>
     </Box>
   );

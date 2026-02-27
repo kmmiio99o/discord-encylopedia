@@ -5,7 +5,7 @@ import {
   Toolbar,
   IconButton,
   Typography,
-  SwipeableDrawer,
+  Drawer,
   List,
   ListItemButton,
   ListItemIcon,
@@ -52,7 +52,7 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
   const [open, setOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
-  const toggleDrawer = (newOpen: boolean) => () => setOpen(newOpen);
+  const handleClose = () => setOpen(false);
 
   return (
     <>
@@ -60,24 +60,26 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
         position="fixed"
         elevation={0}
         sx={{
-          bgcolor: alpha(theme.palette.background.paper, 0.8),
-          backdropFilter: "blur(12px)",
-          borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          bgcolor: alpha(theme.palette.background.paper, 0.85),
+          backdropFilter: "blur(20px) saturate(180%)",
+          borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
           zIndex: theme.zIndex.drawer + 1,
+          transition: "all 0.3s ease",
         }}
       >
-        <Toolbar sx={{ justifyContent: "space-between", px: 2 }}>
+        <Toolbar sx={{ justifyContent: "space-between", px: 2, minHeight: 56 }}>
           <Stack
             direction="row"
             spacing={1.5}
             alignItems="center"
             component={NavLink}
             to="/"
+            onClick={() => setOpen(false)}
             sx={{
               textDecoration: "none",
               "& .discord-logo": {
                 color: theme.palette.primary.main,
-                transition: "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
               },
               "&:active .discord-logo, &:hover .discord-logo": {
                 transform: "rotate(360deg)",
@@ -98,11 +100,18 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
             </Typography>
           </Stack>
 
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={0.5}>
             <IconButton
               onClick={toggleTheme}
               size="small"
-              sx={{ color: theme.palette.text.secondary }}
+              sx={{
+                color: theme.palette.text.secondary,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  color: theme.palette.primary.main,
+                  transform: "rotate(20deg)",
+                },
+              }}
             >
               {isDarkMode ? (
                 <Brightness7 fontSize="small" />
@@ -111,10 +120,15 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
               )}
             </IconButton>
             <IconButton
-              onClick={toggleDrawer(!open)}
+              onClick={() => setOpen(!open)}
               edge="end"
               sx={{
-                color: open ? theme.palette.primary.main : "inherit",
+                color: theme.palette.text.primary,
+                bgcolor: open ? alpha(theme.palette.primary.main, 0.1) : "transparent",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  bgcolor: alpha(theme.palette.primary.main, 0.15),
+                },
               }}
             >
               {open ? <CloseIcon /> : <MenuIcon />}
@@ -123,63 +137,72 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
         </Toolbar>
       </AppBar>
 
-      <SwipeableDrawer
+      <Drawer
         anchor="top"
         open={open}
-        onClose={toggleDrawer(false)}
-        onOpen={toggleDrawer(true)}
+        onClose={handleClose}
         PaperProps={{
           sx: {
             width: "100%",
-            maxHeight: "80vh",
+            maxHeight: "85vh",
             borderRadius: "0 0 24px 24px",
-            bgcolor: theme.palette.background.paper,
+            bgcolor: alpha(theme.palette.background.paper, 0.95),
+            backdropFilter: "blur(20px) saturate(180%)",
             backgroundImage: "none",
-            pt: 8,
-            pb: 2,
+            pt: 7,
+            pb: 4,
+            boxShadow: `0 20px 60px ${alpha(theme.palette.common.black, 0.15)}`,
           },
         }}
       >
-        <Box sx={{ px: 2, pb: 1 }}>
-          <Typography
-            variant="overline"
-            sx={{ px: 2, fontWeight: 700, color: theme.palette.text.disabled }}
-          >
-            Menu
-          </Typography>
-          <List>
+        <Box sx={{ px: 2 }}>
+          <List sx={{ pt: 1 }}>
             {menuItems.map((item) => (
               <ListItemButton
                 key={item.label}
                 component={NavLink}
                 to={item.path}
-                onClick={toggleDrawer(false)}
+                onClick={handleClose}
                 sx={{
-                  borderRadius: "12px",
+                  borderRadius: "16px",
                   mb: 0.5,
-                  py: 1.5,
+                  py: 1.75,
+                  px: 2,
                   bgcolor: isActive(item.path)
-                    ? alpha(theme.palette.primary.main, 0.08)
+                    ? alpha(theme.palette.primary.main, 0.12)
                     : "transparent",
                   color: isActive(item.path)
                     ? theme.palette.primary.main
                     : theme.palette.text.primary,
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                  "&:hover": {
+                    bgcolor: isActive(item.path)
+                      ? alpha(theme.palette.primary.main, 0.18)
+                      : alpha(theme.palette.primary.main, 0.06),
+                    transform: "translateX(4px)",
+                  },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 40,
+                    color: "inherit",
+                  }}
+                >
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText
                   primary={item.label}
                   primaryTypographyProps={{
-                    fontWeight: isActive(item.path) ? 800 : 500,
+                    fontWeight: isActive(item.path) ? 800 : 600,
+                    fontSize: "0.95rem",
                   }}
                 />
               </ListItemButton>
             ))}
           </List>
         </Box>
-      </SwipeableDrawer>
+      </Drawer>
       <Toolbar />
     </>
   );
