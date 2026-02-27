@@ -51,13 +51,12 @@ const ClientCard: React.FC<ClientCardProps> = ({
 
   const cleanLanguage = (lang: string): string => {
     if (!lang) return "Multi";
-    let raw = lang
-      .replace(/[\[\]!]/g, "")
-      .replace(/-Badge/gi, "")
-      .replace(/-Url/gi, "")
-      .trim();
-    const parts = raw.split(/(?=[A-Z])/);
-    return parts.length > 0 ? parts[0] : raw;
+    if (lang.toLowerCase().includes("closed source")) return "Closed source";
+    const matches = lang.match(/\[([a-zA-Z#+\.][a-zA-Z0-9#+\.\s-]*)\]/g);
+    if (matches && matches.length > 0) {
+      return matches[0].slice(1, -1);
+    }
+    return lang.trim();
   };
 
   return (
