@@ -1,13 +1,8 @@
 import React from "react";
 import useSWR from "swr";
 import { ClientCategory } from "../types/ClientMod";
-
-const DEFAULT_URLS = {
-  README:
-    "https://raw.githubusercontent.com/Discord-Client-Encyclopedia-Management/Discord3rdparties/refs/heads/main/README.md",
-  PLUGINS:
-    "https://raw.githubusercontent.com/Purple-EyeZ/Plugins-List/refs/heads/main/src/plugins-data.json",
-};
+import { api } from "../services/api/client";
+import { EXTERNAL_URLS } from "../services/api/urls";
 
 const parseMarkdownContent = (content: string): ClientCategory[] => {
   console.log("Parsing markdown content:", content.length, "chars");
@@ -16,9 +11,9 @@ const parseMarkdownContent = (content: string): ClientCategory[] => {
 
 export function useRemoteMarkdown(url: string) {
   const fetcher = async (url: string) => {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch markdown");
-    return response.text();
+    const result = await api.get(url);
+    if (result.error) throw new Error(result.error);
+    return result.data!;
   };
 
   const { data, error, isLoading, mutate } = useSWR(url, fetcher, {
@@ -32,9 +27,9 @@ export function useRemoteMarkdown(url: string) {
 
 export function useRemoteJson<T>(url: string) {
   const fetcher = async (url: string): Promise<T> => {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch JSON");
-    return response.json();
+    const result = await api.json<T>(url);
+    if (result.error) throw new Error(result.error);
+    return result.data!;
   };
 
   const { data, error, isLoading, mutate } = useSWR<T>(url, fetcher, {
@@ -51,7 +46,7 @@ export function useClientMods() {
     data: markdown,
     error,
     isLoading,
-  } = useRemoteMarkdown(DEFAULT_URLS.README);
+  } = useRemoteMarkdown(EXTERNAL_URLS.README);
 
   const categories = React.useMemo(() => {
     if (!markdown) return [];

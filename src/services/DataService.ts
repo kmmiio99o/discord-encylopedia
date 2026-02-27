@@ -1,107 +1,32 @@
 import { ClientMod, ClientCategory } from "../types/ClientMod";
 import { Plugin } from "../types/Plugin";
-
-export const EXTERNAL_URLS = {
-  README:
-    "https://raw.githubusercontent.com/Discord-Client-Encyclopedia-Management/Discord3rdparties/refs/heads/main/README.md",
-  PLUGINS:
-    "https://raw.githubusercontent.com/Purple-EyeZ/Plugins-List/refs/heads/main/src/plugins-data.json",
-};
+import { api } from "./api/client";
 
 export interface FetchOptions {
   cacheTime?: number;
-  retryCount?: number;
-  timeout?: number;
 }
 
 class DataService {
-  private cache = new Map<string, { data: any; timestamp: number }>();
-
   async fetchMarkdown(url: string, options?: FetchOptions): Promise<string> {
-    return this.fetchWithCache(url, options);
+    if (options?.cacheTime) {
+      api.setCacheTime(options.cacheTime);
+    }
+    const result = await api.get(url);
+    if (result.error) throw new Error(result.error);
+    return result.data!;
   }
 
   async fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
-    return this.fetchWithCache(url, options);
+    if (options?.cacheTime) {
+      api.setCacheTime(options.cacheTime);
+    }
+    const result = await api.json<T>(url);
+    if (result.error) throw new Error(result.error);
+    return result.data!;
   }
 
-  private async fetchWithCache<T>(
-    url: string,
-    options?: FetchOptions,
-  ): Promise<T> {
-    const cacheKey = url;
-    const now = Date.now();
-    const cacheEntry = this.cache.get(cacheKey);
-
-    const {
-      cacheTime = 5 * 60 * 1000,
-      retryCount = 3,
-      timeout = 10000,
-    } = options || {};
-
-    if (cacheEntry && now - cacheEntry.timestamp < cacheTime) {
-      return cacheEntry.data;
-    }
-
-    for (let attempt = 0; attempt <= retryCount; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-        const response = await fetch(url, {
-          signal: controller.signal,
-          headers: {
-            Accept: "application/json, text/markdown, text/plain",
-            "Cache-Control": "no-cache",
-          },
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        let data: T;
-        if (url.endsWith(".json")) {
-          data = await response.json();
-        } else {
-          data = (await response.text()) as T;
-        }
-
-        this.cache.set(cacheKey, { data, timestamp: now });
-
-        return data;
-      } catch (error) {
-        if (attempt === retryCount) {
-          console.error(
-            `Failed to fetch ${url} after ${retryCount} attempts:`,
-            error,
-          );
-
-          if (cacheEntry) {
-            console.warn("Returning stale cache data");
-            return cacheEntry.data;
-          }
-
-          throw error;
-        }
-
-        await new Promise((resolve) =>
-          setTimeout(resolve, 1000 * Math.pow(2, attempt)),
-        );
-      }
-    }
-
-    throw new Error("Failed to fetch data");
-  }
-
-  clearCache(url?: string) {
-    if (url) {
-      this.cache.delete(url);
-    } else {
-      this.cache.clear();
-    }
+  clearCache() {
+    api.clearCache();
   }
 
   async parseMarkdownFromUrl(url: string): Promise<ClientCategory[]> {
