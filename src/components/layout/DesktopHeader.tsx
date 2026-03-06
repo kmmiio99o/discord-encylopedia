@@ -137,9 +137,7 @@ const DesktopHeader: React.FC<{ menuItems: MenuItemType[] }> = ({
                   color: isActive(item.path)
                     ? theme.palette.primary.main
                     : theme.palette.text.secondary,
-                  bgcolor: isActive(item.path)
-                    ? alpha(theme.palette.primary.main, 0.08)
-                    : "transparent",
+                  bgcolor: alpha(theme.palette.action.active, 0.05),
                   "&:hover": {
                     bgcolor: alpha(theme.palette.primary.main, 0.12),
                     color: theme.palette.primary.main,

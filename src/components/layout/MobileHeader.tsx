@@ -64,7 +64,6 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
           backdropFilter: "blur(20px) saturate(180%)",
           borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
           zIndex: theme.zIndex.drawer + 1,
-          transition: "all 0.3s ease",
         }}
       >
         <Toolbar sx={{ justifyContent: "space-between", px: 2, minHeight: 56 }}>
@@ -77,16 +76,9 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
             onClick={() => setOpen(false)}
             sx={{
               textDecoration: "none",
-              "& .discord-logo": {
-                color: theme.palette.primary.main,
-                transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              },
-              "&:active .discord-logo, &:hover .discord-logo": {
-                transform: "rotate(360deg)",
-              },
             }}
           >
-            <DiscordIcon className="discord-logo" />
+            <DiscordIcon sx={{ color: "primary.main", fontSize: 22 }} />
             <Typography
               variant="h6"
               sx={{
@@ -106,11 +98,6 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
               size="small"
               sx={{
                 color: theme.palette.text.secondary,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  color: theme.palette.primary.main,
-                  transform: "rotate(20deg)",
-                },
               }}
             >
               {isDarkMode ? (
@@ -125,7 +112,6 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
               sx={{
                 color: theme.palette.text.primary,
                 bgcolor: open ? alpha(theme.palette.primary.main, 0.1) : "transparent",
-                transition: "all 0.3s ease",
                 "&:hover": {
                   bgcolor: alpha(theme.palette.primary.main, 0.15),
                 },
@@ -174,12 +160,10 @@ const MobileHeader: React.FC<{ menuItems: any[] }> = ({ menuItems }) => {
                   color: isActive(item.path)
                     ? theme.palette.primary.main
                     : theme.palette.text.primary,
-                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                   "&:hover": {
                     bgcolor: isActive(item.path)
                       ? alpha(theme.palette.primary.main, 0.18)
                       : alpha(theme.palette.primary.main, 0.06),
-                    transform: "translateX(4px)",
                   },
                 }}
               >
