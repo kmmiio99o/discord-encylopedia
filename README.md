@@ -8,8 +8,8 @@ Commit what you want, really, I don't even care, just make it work and look good
 - [x] Make About Page
 - [x] Implment some sort of Material design
 - [ ] Make plugins pages
-- [ ] Finish clients page
-- [ ] Improve the design
+- [x] Finish clients page
+- [x] Improve the design
 - [ ] Add more useful information
 - [ ] Create own clients list
 - [ ] Make most things be based on JSON files for easier management
