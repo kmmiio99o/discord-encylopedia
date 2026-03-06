@@ -6,6 +6,6 @@ interface ThemeContextType {
 }
 
 export const ThemeContext = React.createContext<ThemeContextType>({
-  isDarkMode: false,
-  toggleTheme: () => {},
+    isDarkMode: false,
+    toggleTheme: () => {},
 });

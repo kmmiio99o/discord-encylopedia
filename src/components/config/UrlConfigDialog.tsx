@@ -1,22 +1,22 @@
-import React, { useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Alert,
-  Box,
-  IconButton,
-  Tooltip,
-} from "@mui/material";
-import {
-  Settings as SettingsIcon,
-  Restore as RestoreIcon,
-  ContentCopy as CopyIcon,
-  Check as CheckIcon,
+    Check as CheckIcon,
+    ContentCopy as CopyIcon,
+    Restore as RestoreIcon,
+    Settings as SettingsIcon,
 } from "@mui/icons-material";
+import {
+    Alert,
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    TextField,
+    Tooltip,
+} from "@mui/material";
+import React, { useState } from "react";
 
 interface UrlConfigDialogProps {
   open: boolean;
@@ -26,118 +26,118 @@ interface UrlConfigDialogProps {
 }
 
 const UrlConfigDialog: React.FC<UrlConfigDialogProps> = ({
-  open,
-  onClose,
-  onSubmit,
-  initialUrls,
+    open,
+    onClose,
+    onSubmit,
+    initialUrls,
 }) => {
-  const [urls, setUrls] = useState(initialUrls);
-  const [copied, setCopied] = useState(false);
+    const [urls, setUrls] = useState(initialUrls);
+    const [copied, setCopied] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(urls);
-  };
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(urls);
+    };
 
-  const handleReset = () => {
-    setUrls({
-      readme:
+    const handleReset = () => {
+        setUrls({
+            readme:
         "https://raw.githubusercontent.com/Discord-Client-Encyclopedia-Management/Discord3rdparties/refs/heads/main/README.md",
-      plugins:
+            plugins:
         "https://raw.githubusercontent.com/Purple-EyeZ/Plugins-List/refs/heads/main/src/plugins-data.json",
-    });
-  };
+        });
+    };
 
-  const copyToClipboard = async () => {
-    const config = JSON.stringify(urls, null, 2);
-    await navigator.clipboard.writeText(config);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+    const copyToClipboard = async () => {
+        const config = JSON.stringify(urls, null, 2);
+        await navigator.clipboard.writeText(config);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
-  const validateUrl = (url: string): boolean => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+    const validateUrl = (url: string): boolean => {
+        try {
+            new URL(url);
+            return true;
+        } catch {
+            return false;
+        }
+    };
 
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <form onSubmit={handleSubmit}>
-        <DialogTitle>
-          <Box display="flex" alignItems="center" gap={1}>
-            <SettingsIcon />
+    return (
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+            <form onSubmit={handleSubmit}>
+                <DialogTitle>
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <SettingsIcon />
             Configure External URLs
-          </Box>
-        </DialogTitle>
+                    </Box>
+                </DialogTitle>
 
-        <DialogContent dividers>
-          <Alert severity="info" sx={{ mb: 2 }}>
+                <DialogContent dividers>
+                    <Alert severity="info" sx={{ mb: 2 }}>
             Configure the external URLs where your data is stored. Use raw
             GitHub URLs or any public JSON/Markdown endpoints.
-          </Alert>
+                    </Alert>
 
-          <TextField
-            fullWidth
-            label="README.md URL"
-            value={urls.readme}
-            onChange={(e) => setUrls({ ...urls, readme: e.target.value })}
-            margin="normal"
-            error={!validateUrl(urls.readme)}
-            helperText={
-              !validateUrl(urls.readme)
-                ? "Invalid URL"
-                : "URL to your markdown file"
-            }
-            required
-          />
+                    <TextField
+                        fullWidth
+                        label="README.md URL"
+                        value={urls.readme}
+                        onChange={e => setUrls({ ...urls, readme: e.target.value })}
+                        margin="normal"
+                        error={!validateUrl(urls.readme)}
+                        helperText={
+                            !validateUrl(urls.readme)
+                                ? "Invalid URL"
+                                : "URL to your markdown file"
+                        }
+                        required
+                    />
 
-          <TextField
-            fullWidth
-            label="Plugins JSON URL"
-            value={urls.plugins}
-            onChange={(e) => setUrls({ ...urls, plugins: e.target.value })}
-            margin="normal"
-            error={!validateUrl(urls.plugins)}
-            helperText={
-              !validateUrl(urls.plugins)
-                ? "Invalid URL"
-                : "URL to your plugins JSON file"
-            }
-            required
-          />
+                    <TextField
+                        fullWidth
+                        label="Plugins JSON URL"
+                        value={urls.plugins}
+                        onChange={e => setUrls({ ...urls, plugins: e.target.value })}
+                        margin="normal"
+                        error={!validateUrl(urls.plugins)}
+                        helperText={
+                            !validateUrl(urls.plugins)
+                                ? "Invalid URL"
+                                : "URL to your plugins JSON file"
+                        }
+                        required
+                    />
 
-          <Box display="flex" gap={1} mt={2}>
-            <Tooltip title="Reset to default URLs">
-              <IconButton onClick={handleReset} size="small">
-                <RestoreIcon />
-              </IconButton>
-            </Tooltip>
+                    <Box display="flex" gap={1} mt={2}>
+                        <Tooltip title="Reset to default URLs">
+                            <IconButton onClick={handleReset} size="small">
+                                <RestoreIcon />
+                            </IconButton>
+                        </Tooltip>
 
-            <Tooltip title={copied ? "Copied!" : "Copy configuration"}>
-              <IconButton onClick={copyToClipboard} size="small">
-                {copied ? <CheckIcon /> : <CopyIcon />}
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </DialogContent>
+                        <Tooltip title={copied ? "Copied!" : "Copy configuration"}>
+                            <IconButton onClick={copyToClipboard} size="small">
+                                {copied ? <CheckIcon /> : <CopyIcon />}
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                </DialogContent>
 
-        <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={!validateUrl(urls.readme) || !validateUrl(urls.plugins)}
-          >
+                <DialogActions>
+                    <Button onClick={onClose}>Cancel</Button>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={!validateUrl(urls.readme) || !validateUrl(urls.plugins)}
+                    >
             Save Configuration
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
-  );
+                    </Button>
+                </DialogActions>
+            </form>
+        </Dialog>
+    );
 };
 
 export default UrlConfigDialog;
